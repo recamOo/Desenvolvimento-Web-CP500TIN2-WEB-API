@@ -235,7 +235,7 @@
 
         .stats {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
+            grid-template-columns: repeat(2, 1fr);
             gap: 14px;
             margin-top: 18px;
         }
@@ -444,9 +444,7 @@
                     result: 'Clique em “Testar API” para buscar a data e a hora.',
                     data: '-',
                     hora: '-',
-                    horaAtual: '--:--:--',
                     lastUpdated: null,
-                    clockTimer: null,
                 };
             },
             computed: {
@@ -486,13 +484,6 @@
                         this.loading = false;
                     }
                 },
-                atualizarRelogio() {
-                    this.horaAtual = new Intl.DateTimeFormat('pt-BR', {
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        second: '2-digit',
-                    }).format(new Date());
-                },
                 formatLastUpdated() {
                     if (!this.lastUpdated) return 'Nenhuma consulta realizada ainda.';
                     return new Intl.DateTimeFormat('pt-BR', {
@@ -502,16 +493,7 @@
                 },
             },
             mounted() {
-                this.atualizarRelogio();
-                this.clockTimer = setInterval(() => {
-                    this.atualizarRelogio();
-                }, 1000);
                 this.buscarData();
-            },
-            beforeUnmount() {
-                if (this.clockTimer) {
-                    clearInterval(this.clockTimer);
-                }
             },
             template: `
                 <main class="shell">
@@ -555,10 +537,6 @@
                                 <div class="stat">
                                     <strong>{{ hora }}</strong>
                                     <span>Hora retornada pela API</span>
-                                </div>
-                                <div class="stat">
-                                    <strong>{{ horaAtual }}</strong>
-                                    <span>Hora em tempo real</span>
                                 </div>
                             </div>
                         </aside>
