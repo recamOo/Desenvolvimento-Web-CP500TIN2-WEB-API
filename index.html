@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Teste da API</title>
+</head>
+<body>
+    <h1>Teste da API</h1>
+    <p>Endpoint testado: <span id="endpoint"></span></p>
+    <button id="btn-testar" type="button">Testar API</button>
+    <pre id="display">Aguardando teste...</pre>
+
+    <script>
+        const API_URL = 'https://desenvolvimento-web-cp500tin2-api.onrender.com/';
+
+        async function buscarData() {
+            const display = document.getElementById('display');
+
+            try {
+                display.textContent = 'Consultando API...';
+
+                const resposta = await fetch(API_URL);
+                if (!resposta.ok) {
+                    throw new Error(`HTTP ${resposta.status}`);
+                }
+
+                const dados = await resposta.json();
+                const data = dados.data ?? '(campo data não encontrado)';
+                const hora = dados.hora ?? '(campo hora não encontrado)';
+
+                display.textContent = `Sucesso! Hoje é ${data} e agora são ${hora}.`;
+            } catch (erro) {
+                display.textContent = `Falha ao consultar API: ${erro.message}`;
+            }
+        }
+
+        document.getElementById('endpoint').textContent = API_URL;
+        document.getElementById('btn-testar').addEventListener('click', buscarData);
+
+        buscarData();
+    </script>
+</body>
+</html>
