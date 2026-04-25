@@ -1,0 +1,24 @@
+{
+  "name": "desenvolvimento-web-cp500tin2-web-api",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/recamOo/Desenvolvimento-Web-CP500TIN2-WEB-API.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/recamOo/Desenvolvimento-Web-CP500TIN2-WEB-API/issues"
+  },
+  "homepage": "https://github.com/recamOo/Desenvolvimento-Web-CP500TIN2-WEB-API#readme",
+  "dependencies": {
+    "vue": "^3.5.33"
+  }
+}

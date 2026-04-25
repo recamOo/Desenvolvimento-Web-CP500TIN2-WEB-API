@@ -3,42 +3,620 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teste da API</title>
-</head>
-<body>
-    <h1>Teste da API</h1>
-    <p>Endpoint testado: <span id="endpoint"></span></p>
-    <button id="btn-testar" type="button">Testar API</button>
-    <pre id="display">Aguardando teste...</pre>
+    <meta name="theme-color" content="#08111f">
+    <title>Vue API Studio</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/vue@3/dist/vue.global.prod.js"></script>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg: #07111f;
+            --bg-soft: rgba(11, 19, 35, 0.82);
+            --panel: rgba(10, 16, 30, 0.72);
+            --panel-strong: rgba(15, 24, 42, 0.92);
+            --border: rgba(148, 163, 184, 0.16);
+            --text: #e5eefb;
+            --muted: #9fb0ca;
+            --accent: #6ee7ff;
+            --accent-2: #8b5cf6;
+            --success: #34d399;
+            --danger: #fb7185;
+            --warning: #fbbf24;
+            --shadow: 0 30px 80px rgba(0, 0, 0, 0.45);
+        }
 
-    <script>
-        const API_URL = 'https://desenvolvimento-web-cp500tin2-api.onrender.com/';
+        * {
+            box-sizing: border-box;
+        }
 
-        async function buscarData() {
-            const display = document.getElementById('display');
+        html {
+            scroll-behavior: smooth;
+        }
 
-            try {
-                display.textContent = 'Consultando API...';
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at top left, rgba(110, 231, 255, 0.18), transparent 30%),
+                radial-gradient(circle at top right, rgba(139, 92, 246, 0.20), transparent 28%),
+                radial-gradient(circle at bottom, rgba(52, 211, 153, 0.12), transparent 35%),
+                linear-gradient(145deg, #040816 0%, #08111f 40%, #050814 100%);
+            overflow-x: hidden;
+        }
 
-                const resposta = await fetch(API_URL);
-                if (!resposta.ok) {
-                    throw new Error(`HTTP ${resposta.status}`);
-                }
+        body::before {
+            content: "";
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            background-image:
+                linear-gradient(rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+            background-size: 80px 80px;
+            mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.8), transparent 95%);
+            opacity: 0.35;
+        }
 
-                const dados = await resposta.json();
-                const data = dados.data ?? '(campo data não encontrado)';
-                const hora = dados.hora ?? '(campo hora não encontrado)';
+        #app {
+            position: relative;
+            min-height: 100vh;
+        }
 
-                display.textContent = `Sucesso! Hoje é ${data} e agora são ${hora}.`;
-            } catch (erro) {
-                display.textContent = `Falha ao consultar API: ${erro.message}`;
+        .shell {
+            width: min(1180px, calc(100% - 32px));
+            margin: 0 auto;
+            padding: 32px 0 48px;
+        }
+
+        .hero {
+            display: grid;
+            grid-template-columns: 1.3fr 0.9fr;
+            gap: 24px;
+            align-items: stretch;
+            margin-top: 16px;
+        }
+
+        .card {
+            position: relative;
+            background: linear-gradient(180deg, rgba(15, 24, 42, 0.82), rgba(8, 14, 28, 0.88));
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            box-shadow: var(--shadow);
+            backdrop-filter: blur(18px);
+            overflow: hidden;
+        }
+
+        .hero-main {
+            padding: 34px;
+            isolation: isolate;
+        }
+
+        .hero-main::after {
+            content: "";
+            position: absolute;
+            inset: auto -120px -140px auto;
+            width: 280px;
+            height: 280px;
+            background: radial-gradient(circle, rgba(110, 231, 255, 0.35), transparent 68%);
+            filter: blur(10px);
+            z-index: -1;
+        }
+
+        .eyebrow {
+            display: inline-flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            border: 1px solid rgba(110, 231, 255, 0.22);
+            background: rgba(110, 231, 255, 0.08);
+            color: #c6f6ff;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--success);
+            box-shadow: 0 0 0 6px rgba(52, 211, 153, 0.12);
+        }
+
+        h1 {
+            margin: 18px 0 12px;
+            font-size: clamp(2.4rem, 5vw, 4.8rem);
+            line-height: 0.95;
+            letter-spacing: -0.06em;
+        }
+
+        .title-accent {
+            background: linear-gradient(90deg, #ffffff 0%, #bfefff 30%, #8b5cf6 100%);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+
+        .subtitle {
+            max-width: 62ch;
+            margin: 0;
+            color: var(--muted);
+            font-size: 1.03rem;
+            line-height: 1.7;
+        }
+
+        .hero-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-top: 26px;
+        }
+
+        .btn {
+            appearance: none;
+            border: 0;
+            border-radius: 16px;
+            padding: 14px 18px;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+            transition: transform 180ms ease, box-shadow 180ms ease, background 180ms ease, opacity 180ms ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+        }
+
+        .btn:disabled {
+            cursor: wait;
+            opacity: 0.72;
+            transform: none;
+        }
+
+        .btn-primary {
+            color: #05111a;
+            background: linear-gradient(135deg, #7ce9ff 0%, #4de1c1 100%);
+            box-shadow: 0 18px 32px rgba(77, 225, 193, 0.22);
+        }
+
+        .btn-secondary {
+            color: var(--text);
+            background: rgba(148, 163, 184, 0.10);
+            border: 1px solid rgba(148, 163, 184, 0.18);
+        }
+
+        .endpoint-card {
+            padding: 22px;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .panel-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            color: var(--muted);
+            font-size: 0.88rem;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+
+        .chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            border-radius: 999px;
+            background: rgba(52, 211, 153, 0.10);
+            color: #c9ffe8;
+            border: 1px solid rgba(52, 211, 153, 0.18);
+            font-size: 12px;
+            font-weight: 700;
+        }
+
+        .endpoint-box {
+            padding: 16px;
+            border-radius: 20px;
+            background: rgba(3, 8, 20, 0.65);
+            border: 1px solid rgba(148, 163, 184, 0.14);
+            word-break: break-all;
+            font-size: 0.96rem;
+            line-height: 1.6;
+            color: #dce8f7;
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-top: 18px;
+        }
+
+        .stat {
+            padding: 16px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(148, 163, 184, 0.12);
+        }
+
+        .stat strong {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 1.4rem;
+            letter-spacing: -0.04em;
+        }
+
+        .stat span {
+            color: var(--muted);
+            font-size: 0.88rem;
+        }
+
+        .content {
+            display: grid;
+            grid-template-columns: 1.1fr 0.9fr;
+            gap: 24px;
+            margin-top: 24px;
+        }
+
+        .section-card {
+            padding: 26px;
+        }
+
+        .section-title {
+            margin: 0 0 8px;
+            font-size: 1.25rem;
+            letter-spacing: -0.03em;
+        }
+
+        .section-copy {
+            margin: 0 0 18px;
+            color: var(--muted);
+            line-height: 1.7;
+        }
+
+        .result-box {
+            min-height: 220px;
+            padding: 20px;
+            border-radius: 22px;
+            background: linear-gradient(180deg, rgba(5, 12, 24, 0.88), rgba(3, 8, 18, 0.96));
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .result-box::before {
+            content: "";
+            position: absolute;
+            inset: -1px;
+            background: radial-gradient(circle at top right, rgba(110, 231, 255, 0.11), transparent 35%), radial-gradient(circle at bottom left, rgba(139, 92, 246, 0.14), transparent 30%);
+            pointer-events: none;
+        }
+
+        .result-top {
+            position: relative;
+            z-index: 1;
+            display: flex;
+            justify-content: space-between;
+            gap: 16px;
+            align-items: center;
+            margin-bottom: 14px;
+        }
+
+        .status-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 14px;
+            border-radius: 999px;
+            font-size: 0.88rem;
+            font-weight: 700;
+            border: 1px solid rgba(148, 163, 184, 0.16);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .status-pill.success {
+            color: #c9ffe8;
+            background: rgba(52, 211, 153, 0.12);
+            border-color: rgba(52, 211, 153, 0.22);
+        }
+
+        .status-pill.loading {
+            color: #d8f7ff;
+            background: rgba(110, 231, 255, 0.12);
+            border-color: rgba(110, 231, 255, 0.22);
+        }
+
+        .status-pill.error {
+            color: #ffd3dc;
+            background: rgba(251, 113, 133, 0.12);
+            border-color: rgba(251, 113, 133, 0.22);
+        }
+
+        .result-message {
+            position: relative;
+            z-index: 1;
+            margin: 0;
+            white-space: pre-wrap;
+            word-break: break-word;
+            font-size: 1rem;
+            line-height: 1.8;
+            color: #e7f0fd;
+        }
+
+        .meta-grid {
+            display: grid;
+            gap: 14px;
+        }
+
+        .meta-item {
+            padding: 18px;
+            border-radius: 20px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(148, 163, 184, 0.12);
+        }
+
+        .meta-item strong {
+            display: block;
+            margin-bottom: 6px;
+            font-size: 0.84rem;
+            letter-spacing: 0.12em;
+            text-transform: uppercase;
+            color: #b8c6d9;
+        }
+
+        .meta-item span {
+            color: #e7f0fd;
+            line-height: 1.6;
+        }
+
+        .footer-note {
+            margin: 18px 0 0;
+            color: var(--muted);
+            font-size: 0.9rem;
+            line-height: 1.6;
+        }
+
+        .fade-enter-active,
+        .fade-leave-active {
+            transition: opacity 220ms ease, transform 220ms ease;
+        }
+
+        .fade-enter-from,
+        .fade-leave-to {
+            opacity: 0;
+            transform: translateY(6px);
+        }
+
+        @media (max-width: 980px) {
+            .hero,
+            .content {
+                grid-template-columns: 1fr;
+            }
+
+            .stats {
+                grid-template-columns: 1fr;
             }
         }
 
-        document.getElementById('endpoint').textContent = API_URL;
-        document.getElementById('btn-testar').addEventListener('click', buscarData);
+        @media (max-width: 640px) {
+            .shell {
+                width: min(100% - 20px, 1180px);
+                padding-top: 18px;
+            }
 
-        buscarData();
+            .hero-main,
+            .section-card,
+            .endpoint-card {
+                padding: 20px;
+            }
+
+            .result-top {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            h1 {
+                font-size: clamp(2.1rem, 11vw, 3.4rem);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div id="app"></div>
+
+    <script>
+        const { createApp } = Vue;
+
+        createApp({
+            data() {
+                return {
+                    apiUrl: 'https://desenvolvimento-web-cp500tin2-api.onrender.com/',
+                    loading: false,
+                    error: '',
+                    result: 'Clique em “Testar API” para buscar a data e a hora.',
+                    data: '-',
+                    hora: '-',
+                    horaAtual: '--:--:--',
+                    lastUpdated: null,
+                    clockTimer: null,
+                };
+            },
+            computed: {
+                statusLabel() {
+                    if (this.loading) return 'Consultando API';
+                    if (this.error) return 'Falha na consulta';
+                    if (this.lastUpdated) return 'Consulta concluída';
+                    return 'Pronto para testar';
+                },
+                statusClass() {
+                    if (this.loading) return 'loading';
+                    if (this.error) return 'error';
+                    return 'success';
+                },
+            },
+            methods: {
+                async buscarData() {
+                    this.loading = true;
+                    this.error = '';
+                    this.result = 'Consultando API...';
+
+                    try {
+                        const resposta = await fetch(this.apiUrl, { cache: 'no-store' });
+                        if (!resposta.ok) {
+                            throw new Error(`HTTP ${resposta.status}`);
+                        }
+
+                        const dados = await resposta.json();
+                        this.data = dados.data ?? '(campo data não encontrado)';
+                        this.hora = dados.hora ?? '(campo hora não encontrado)';
+                        this.result = `Sucesso! Hoje é ${this.data} e agora são ${this.hora}.`;
+                        this.lastUpdated = new Date();
+                    } catch (erro) {
+                        this.error = `Falha ao consultar API: ${erro.message}`;
+                        this.result = this.error;
+                    } finally {
+                        this.loading = false;
+                    }
+                },
+                atualizarRelogio() {
+                    this.horaAtual = new Intl.DateTimeFormat('pt-BR', {
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        second: '2-digit',
+                    }).format(new Date());
+                },
+                formatLastUpdated() {
+                    if (!this.lastUpdated) return 'Nenhuma consulta realizada ainda.';
+                    return new Intl.DateTimeFormat('pt-BR', {
+                        dateStyle: 'medium',
+                        timeStyle: 'medium',
+                    }).format(this.lastUpdated);
+                },
+            },
+            mounted() {
+                this.atualizarRelogio();
+                this.clockTimer = setInterval(() => {
+                    this.atualizarRelogio();
+                }, 1000);
+                this.buscarData();
+            },
+            beforeUnmount() {
+                if (this.clockTimer) {
+                    clearInterval(this.clockTimer);
+                }
+            },
+            template: `
+                <main class="shell">
+                    <section class="hero">
+                        <article class="card hero-main">
+                            <div class="eyebrow">
+                                <span class="dot"></span>
+                                Vue 3 + API em tempo real
+                            </div>
+                            <h1>
+                                <span class="title-accent">Teste de API</span>
+                            </h1>
+                            <p class="subtitle">
+                                Esta página foi reescrita com Vue para deixar o estado da interface reativo,
+                                responsivo e mais agradável de usar, sem perder o objetivo principal: consultar a API e exibir data e hora.
+                            </p>
+
+                            <div class="hero-actions">
+                                <button class="btn btn-primary" type="button" :disabled="loading" @click="buscarData">
+                                    {{ loading ? 'Testando...' : 'Testar API' }}
+                                </button>
+                                <a class="btn btn-secondary" :href="apiUrl" target="_blank" rel="noreferrer">
+                                    Abrir endpoint
+                                </a>
+                            </div>
+                        </article>
+
+                        <aside class="card endpoint-card">
+                            <div class="panel-label">
+                                <span>Endpoint</span>
+                                <span class="chip">{{ statusLabel }}</span>
+                            </div>
+
+                            <div class="endpoint-box">{{ apiUrl }}</div>
+
+                            <div class="stats">
+                                <div class="stat">
+                                    <strong>{{ data }}</strong>
+                                    <span>Data retornada pela API</span>
+                                </div>
+                                <div class="stat">
+                                    <strong>{{ hora }}</strong>
+                                    <span>Hora retornada pela API</span>
+                                </div>
+                                <div class="stat">
+                                    <strong>{{ horaAtual }}</strong>
+                                    <span>Hora em tempo real</span>
+                                </div>
+                            </div>
+                        </aside>
+                    </section>
+
+                    <section class="content">
+                        <article class="card section-card">
+                            <h2 class="section-title">Resultado</h2>
+                            <p class="section-copy">
+                                O conteúdo abaixo muda automaticamente conforme a resposta da API, inclusive quando há erro ou carregamento.
+                            </p>
+
+                            <div class="result-box">
+                                <div class="result-top">
+                                    <div class="status-pill" :class="statusClass">
+                                        <span class="dot" :style="{ background: loading ? 'var(--accent)' : error ? 'var(--danger)' : 'var(--success)', boxShadow: loading ? '0 0 0 6px rgba(110, 231, 255, 0.12)' : error ? '0 0 0 6px rgba(251, 113, 133, 0.12)' : '0 0 0 6px rgba(52, 211, 153, 0.12)' }"></span>
+                                        {{ statusLabel }}
+                                    </div>
+                                    <button class="btn btn-secondary" type="button" :disabled="loading" @click="buscarData">
+                                        Atualizar agora
+                                    </button>
+                                </div>
+
+                                <transition name="fade" mode="out-in">
+                                    <p class="result-message" :key="result">{{ result }}</p>
+                                </transition>
+                            </div>
+                        </article>
+
+                        <article class="card section-card">
+                            <h2 class="section-title">Informações</h2>
+                            <p class="section-copy">
+                                Um layout mais forte ajuda a página a parecer um produto real, não só uma tela de teste.
+                            </p>
+
+                            <div class="meta-grid">
+                                <div class="meta-item">
+                                    <strong>Endpoint atual</strong>
+                                    <span>{{ apiUrl }}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <strong>Última atualização</strong>
+                                    <span>{{ formatLastUpdated() }}</span>
+                                </div>
+                                <div class="meta-item">
+                                    <strong>Fluxo</strong>
+                                    <span>Vue controla estado, carregamento, erro e sucesso em uma única interface.</span>
+                                </div>
+                            </div>
+
+                            <p class="footer-note">
+                                Dica: se a API responder com campos diferentes, basta ajustar a leitura no método <strong>buscarData</strong>.
+                            </p>
+                        </article>
+                    </section>
+                </main>
+            `,
+        }).mount('#app');
     </script>
 </body>
 </html>
